@@ -1,10 +1,10 @@
 <?php
 	//TODO: Change table to div
 
-	if(isset($_POST['active']) && isset($_POST['name'])){
+	if(isset($_POST['active']) && isset($_POST['id'])){
 		require('../mysqli/mysqli.connect.php');
-		if($stmt = $mysqli->prepare("UPDATE `maps` SET `active` = ? WHERE `name` = ?")){
-			$stmt->bind_param("is", $_POST['active'],$_POST['name']);
+		if($stmt = $mysqli->prepare("UPDATE `maps` SET `active` = ? WHERE `id` = ?")){
+			$stmt->bind_param("ii", $_POST['active'],$_POST['id']);
                         $stmt->execute();
                         $stmt->close();
                 }
@@ -28,7 +28,7 @@
 				$result = $stmt->get_result();
 				while($row = $result->fetch_assoc()){
 					if(!is_file("../js/maps/".$row['js_file'])){
-						if($stmt2 = $mysqli->prepare("DELETE FROM `maps_active` WHERE id = ?")){
+						if($stmt2 = $mysqli->prepare("DELETE FROM `maps` WHERE id = ?")){
 							$stmt->bind_param("i", $row['id']);
 							$stmt2->execute();
 							$result = $stmt2->get_result();
@@ -53,47 +53,43 @@
 				}
 			}
 ?>
-<div class="globlb"></div>
-<div class="mapamc">
+<div class="map-container">
 	<div class="map">
 		<span>Loading map...</span>
 	</div>
 </div>
-<div id="imaparc">
-	<div id="imapap"></div>
-	<div id="imapapb"></div>
-	<br>
-	<div align="center"><input id="bmapard" type="button" value="Abort" /></div>
-	<br>
-	<br>
-	<div id="imapapi">Scanning map: 0/0</div>
+<div class="overlay bg-dark">
+	<div class="status-container">
+		<div id="status"></div>
+		<div class="progress">
+			<div class="progress-bar  progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="<?= count($new_maps)  ?>"></div>
+		</div>
+		<br>
+		<div align="center"><button id="btn-close" class="btn btn-primary ml-2" type="button">Abort</button></div>
+		<br>
+		<div id="statusi"></div>
+	</div>
 </div>
 <script>
 	var newMaps = <?= json_encode($new_maps) ?>;
 	var newMapsLength = newMaps.length;
 	var newMapsInterval;
 	var newMapsIntervalTries = 10;
-
-	$( function() {
-		$( "#imapapb" ).progressbar({
-			max: newMapsLength,
-			value: 0
-		});
-	});
+	var newMapsError = false;
 
 	$( document ).ready(function() {
-		$( ".globlb" ).fadeIn( "slow", function() {
-			$( "#imaparc" ).fadeIn( "slow", function() {});
+		$( ".overlay" ).fadeIn( "slow", function() {
+			$( ".status-container" ).fadeIn( "slow", function() {});
 		});
 		checkMaps(0);
 	});
 
 	function checkMaps(i){
-		$( "#imapapb" ).progressbar( "value", i );
+		$( ".progress-bar" ).css('width', (100 / newMapsLength * i)+'%').attr('aria-valuenow', i);
 		$.getScript('js/maps/'+newMaps[i]['js_file'])
 		.done(function( script, textStatus ) {
 			$(function () {
-				$(".mapamc").mapael({
+				$(".map-container").mapael({
 					map: {
 						name: newMaps[i]['name']
 					}
@@ -104,16 +100,15 @@
 		var ratio = 0;
 		newMapsInterval = setInterval(function() {
 			t++;
-			$( "#imapap" ).text("Scanning map: "+i+"/"+newMapsLength+" - "+newMaps[i]['title']+" ("+t+"/"+newMapsIntervalTries+")");
+			$( "#status" ).text("Scanning map: "+(i + 1)+"/"+newMapsLength+" - "+newMaps[i]['title']+" ("+t+"/"+newMapsIntervalTries+")");
 			checkMapsWait(i,t);
 		}, 500);
 	}
 	
 	function checkMapsWait(i,t){
-		if($(".mapamc").height() > 50){
+		if($(".map-container").height() > 50){
 			clearInterval(newMapsInterval);
-			ratio = $(".mapamc").width() / $(".mapamc").height();
-			//$("#imapapi").append("<div>Map loaded: "+newMaps[i]['title']</div>");
+			ratio = $(".map-container").width() / $(".map-container").height();
 			$.post( "ajax/activate.php", {title:newMaps[i]['title'], name:newMaps[i]['name'], js_file:newMaps[i]['js_file'], ratio:ratio.toFixed(3)})
 			.done(function(){
 				checkMapsDone(i);
@@ -121,7 +116,8 @@
 		}
 		else if(t >= newMapsIntervalTries){
 			clearInterval(newMapsInterval);
-			$("#imapapi").append("<div class=\"error\">Failed loading map: "+newMaps[i]['title']+"</div>");
+			$("#statusi").append("<div class=\"alert alert-danger\">Failed loading map: "+newMaps[i]['title']+"</div>");
+			newMapsError = true;
 			checkMapsDone(i);
 		}
 	}
@@ -129,22 +125,24 @@
 	function checkMapsDone(i){
 		i++;
 		if(i < newMapsLength){
-			$(".mapamc").html("<div class=\"map\"><span>Loading map...</span></div>");
+			$(".map-container").html("<div class=\"map\"><span>Loading map...</span></div>");
 			checkMaps(i);
 		}
 		else{
-			$("#imapap").text("Complete");
-			$("#bmapard").val("Close");
-			$("#imapapb").progressbar("value", newMapsLength );
-			$(".mapamc").fadeOut("slow", function() {});
+			$("#status").text("Complete");
+			$("#btn-close").text("Close");
+			$( ".progress-bar" ).css('width', '100%').attr('aria-valuenow', newMapsLength);
+			if(newMapsError){$(".progress-bar").addClass('bg-danger');}
+			else{$(".progress-bar").addClass('bg-success');}
+			$(".map-container").fadeOut("slow", function() {});
 		}
 	}
 
-	$("#bmapard").click(function(){
-		$( "#imaparc" ).fadeOut( "slow", function() {
-			$( ".globlb" ).fadeOut( "slow", function() {
+	$("#btn-close").click(function(){
+		$( ".status-container" ).fadeOut( "slow", function() {
+			$( ".overlay" ).fadeOut( "slow", function() {
 				$.post( "ajax/activate.php", function( data ) {
-					$( "#menu-opt" ).html( data );
+					$( "#main-container" ).html( data );
 				});
 			});
 		});
@@ -153,17 +151,8 @@
 <?php
 		}
 ?>
-<div class="jumbotron p-3 p-md-5 mt-4 text-white rounded bg-dark">
-	<div class="col-md-6 px-0">
-		<p class="lead mb-3">Maps that are not needed can be disabled here. They will not be preloaded anymore and take up memory and loading time on the client.</p>
-		<p class="lead mb-3">It is possible to create your own map. Please follow the instructions here: <a href="https://www.vincentbroute.fr/mapael/create-map.php" target="_blank">https://www.vincentbroute.fr/mapael/create-map.php</a></p>
-		<p class="lead mb-3">A list of available maps can be found in this repository: <a href="https://github.com/neveldo/mapael-maps" target="_blank">https://github.com/neveldo/mapael-maps</a></p>
-		<p class="lead mb-3">Read the documentaion on how to add a new map to naGeo: <a href="www.it-hunger.de" target="_blank">www.it-hunger.de</a></p>
-		<p class="lead mb-3">If you have added a new map or removed a map from the maps directory click here: <button id="btn-load-maps" type="button" class="btn btn-primary ml-2">Update maps</button></p>
-	</div>
-</div>
-<div class="container">
-	<table class="table">
+<div class="container-fluid">
+	<table class="table table-hover">
 		<thead>
 			<tr>
 				<th scope="col">Name</th>
@@ -173,11 +162,13 @@
 		</thead>
 		<tbody>
 <?php
-		if($stmt = $mysqli->prepare("SELECT title,name,active,ratio FROM maps ORDER BY name")){
+		$check = array('location_off','location_on');
+		$check_clr = array('danger','success');
+		if($stmt = $mysqli->prepare("SELECT id,title,active,ratio FROM maps ORDER BY name")){
 			$stmt->execute();
 			$result = $stmt->get_result();
 			while($row = $result->fetch_assoc()){
-				echo "<tr><td>".$row['title']."</td><td>".$row['ratio']."</td><td>".$row['active']."</td></tr>\n";
+				echo "<tr class=\"map-entry\" data-id=\"".$row['id']."\" data-active=\"".$row['active']."\"><td>".$row['title']."</td><td>".$row['ratio']."</td><td class=\"text-center active-icon\"><i class=\"material-icons text-".$check_clr[$row['active']]."\">".$check[$row['active']]."</i></td></tr>\n";
 			}
 			$stmt->close();
 		}
@@ -186,12 +177,34 @@
 		</tbody>
 	</table>
 </div>
+<div class="jumbotron p-3 p-md-5 mt-4 text-white rounded bg-dark">
+	<div class="col-md-6 px-0">
+		<p class="lead mb-3">Maps that are not needed can be disabled here. They will not be preloaded anymore and take up memory and loading time on the client.</p>
+		<p class="lead mb-3">It is possible to create your own map. Please follow the instructions here: <a href="https://www.vincentbroute.fr/mapael/create-map.php" target="_blank">https://www.vincentbroute.fr/mapael/create-map.php</a></p>
+		<p class="lead mb-3">A list of available maps can be found in this repository: <a href="https://github.com/neveldo/mapael-maps" target="_blank">https://github.com/neveldo/mapael-maps</a></p>
+		<p class="lead mb-3">Read the documentaion on how to add a new map to naGeo: <a href="www.it-hunger.de" target="_blank">www.it-hunger.de</a></p>
+		<p class="lead mb-3">If you have added a new map or removed a map from the maps directory click here: <button id="btn-load-maps" type="button" class="btn btn-primary ml-2">Update maps</button></p>
+	</div>
+</div>
 <script>
-	$( "#btn-load-maps" ).click(function() {
+	$("#btn-load-maps").click(function() {
 		$.post( "ajax/activate.php", {reload_maps:1})
 		.done(function( data ) {
-			$( "#menu-opt" ).html( data );
+			$( "#main-container" ).html(data);
 		});
+	});
+	
+	$(".map-entry").click(function() {
+		if($(this).data("active") == 1){
+			$(this).data("active",0);
+			$(this).find(".active-icon").html("<i class=\"material-icons text-danger\">location_off</i>");
+			$.post( "ajax/activate.php", {id:$(this).data("id"),active:0})
+		}
+		else{
+			$(this).data("active",1);
+			$(this).find(".active-icon").html("<i class=\"material-icons text-success\">location_on</i>");
+			$.post( "ajax/activate.php", {id:$(this).data("id"),active:1})
+		}
 	});
 </script>
 <?php } ?>
