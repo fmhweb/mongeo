@@ -195,8 +195,8 @@
 				},
 				defaultArea: {
 					attrs: {
-						fill: "#424949"
-						, stroke: "#ced8d0"
+						fill: "#007bff",
+						stroke: "#ced8d0"
 					}
 					, attrsHover: {
 						fill: "#5D6D7E"

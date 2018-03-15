@@ -69,7 +69,8 @@
 				</div>
 			</div>
 			<div class="d-flex justify-content-start">
-				<button type="button" class="btn btn-primary ml-2"><i id="breload" class="material-icons">brightness_3</i></button>
+				<button type="button" class="btn btn-secondary ml-2 collapse" id="loading"><i id="breload" class="material-icons">hourglass_full</i></button>
+				<button type="button" class="btn btn-primary ml-2"><i id="breload" class="material-icons">wb_sunny</i></button>
 				<button type="button" class="btn btn-primary ml-2"><i id="breload" class="material-icons">autorenew</i></button>
 			</div>
 		</nav>
