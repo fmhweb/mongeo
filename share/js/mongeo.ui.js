@@ -1,4 +1,10 @@
-$("#btn-activate-maps").click(function(){
+$("#btn-create").click(function(){
+	$.post( "ajax/create.php", function( data ) {
+		$( "#main-container" ).html( data );
+	});
+});
+
+$("#btn-activate").click(function(){
 	$.post( "ajax/activate.php", function( data ) {
 		$( "#main-container" ).html( data );
 	});

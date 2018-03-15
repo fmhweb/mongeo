@@ -16,13 +16,17 @@
 		<link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
 	</head>
 	<body>
-		<nav class="navbar navbar-dark bg-dark">
+		<nav class="navbar fixed-top navbar-dark bg-dark">
 			<div class="d-flex justify-content-start">
 				<div class="dropdown">
 					<button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i id="bmenu" class="material-icons">reorder</i>
 					</button>
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						<a class="dropdown-item" href="#">
+							<i class="material-icons">dashboard</i>
+							Dashboard
+						</a>
 						<a class="dropdown-item" href="#">
 							<i class="material-icons">unarchive</i>
 							Open map(s)
@@ -31,7 +35,7 @@
 							<i class="material-icons">sync</i>
 							Rotate maps
 						</a>
-						<a class="dropdown-item" href="#">
+						<a id="btn-create" class="dropdown-item" href="#">
 							<i class="material-icons">public</i>
 							Create map
 						</a>
@@ -57,7 +61,7 @@
 							<i class="material-icons">edit_location</i>
 							Edit locations
 						</a>
-						<a id="btn-activate-maps" class="dropdown-item" href="#">
+						<a id="btn-activate" class="dropdown-item" href="#">
 							<i class="material-icons">language</i>
 							Activate maps
 						</a>

@@ -7,10 +7,10 @@
 					$stmt->bind_param("sdd", $_POST['name'],$_POST['lat'],$_POST['lon']);
 					$stmt->execute();
 					$stmt->close();
-					echo "{return:0,option:1}";
+					echo "{ret:0,option:1}";
 				}
 				else{
-					echo "{return:1,option:1}";
+					echo "{ret:1,option:1}";
 				}
 			}
 			elseif($_POST['option'] == 2){
@@ -18,18 +18,52 @@
 					$stmt->bind_param("sis", $_POST['name'],$_POST['map'],$_POST['area']);
 					$stmt->execute();
 					$stmt->close();
-					echo "{return:0,option:2,res:".$_POST['area']."}";
+					echo "{ret:0,option:2}";
 				}
 				else{
-					echo "{return:1,option:2}";
+					echo "{ret:1,option:2}";
 				}
 			}
-			$mysqli->close();
 		}
+		//TODO: Update
+		$mysqli->close();
+	}
+	elseif(isset($_POST['load_locations'])){
+		$ret = 0;
+		$plots = array();
+		$areas = array();
+		if($stmt = $mysqli->prepare("SELECT * FROM location_plots;")){
+			$stmt->execute();
+			$result = $stmt->get_result();
+			$i = 0;
+			while($row = $result->fetch_assoc()){
+				foreach($row as $key => $val){
+					$plots[$i][$key] = $val;
+				}
+				$i++;
+			}
+			$stmt->close();
+		}
+		else{$ret = 1;}
+		if($stmt = $mysqli->prepare("SELECT * FROM location_areas;")){
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        $i = 0;
+                        while($row = $result->fetch_assoc()){
+                                foreach($row as $key => $val){
+                                        $areas[$i][$key] = $val;
+                                }
+                                $i++;
+                        }
+                        $stmt->close();
+                }
+                else{$ret = 1;}
+		$mysqli->close();
+		echo json_encode(array("ret"=>$ret,"plots"=>$plots,"areas"=>$areas));
 	}
 	else{
 ?>
-<div class="container-fluid">
+<div class="container-fluid clear-top">
 	<div class="row">
 		<div id="map-col" class="col-sm pt-3">
 			<div class="map-container">
@@ -85,6 +119,42 @@
 			</form>
 		</div>
 	</div>
+</div>
+<div class="container-fluid mt-4">
+	<h5>Location plots:</h5>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th scope="col">Name</th>
+				<th scope="col">Latitude</th>
+				<th scope="col">Longlitude</th>
+				<th scope="col">created</th>
+				<th scope="col">created_by_id</th>
+				<th scope="col">updated</th>
+				<th scope="col">updated_by_id</th>
+			</tr>
+		</thead>
+		<tbody id="table-plots">
+		</tbody>
+	</table>
+</div>
+<div class="container-fluid mt-4">
+        <h5>Location areas:</h5>
+        <table class="table table-hover">
+                <thead>
+                        <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Map</th>
+                                <th scope="col">Area</th>
+                                <th scope="col">created</th>
+                                <th scope="col">created_by_id</th>
+                                <th scope="col">updated</th>
+                                <th scope="col">updated_by_id</th>
+                        </tr>
+                </thead>
+                <tbody id="table-areas">
+                </tbody>
+        </table>
 </div>
 <div class="overlay bg-dark">
 	<img class="google-help" src="images/google-maps-instructions.png" />
@@ -150,6 +220,25 @@
 		});
 	}
 
+	function loadLocations(){
+		$.post("ajax/locations.php", {load_locations:"1"}, function(data){
+			//console.log(data);
+			if(data.ret == 0){
+				$("#table-plots tr").remove();
+				$("#table-areas tr").remove();
+				for(var i = 0;i < data.plots.length;i++){
+					var row = data.plots[i];
+					$("#table-plots").append("<tr><td>"+row.name+"</td><td>"+row.latitude+"</td><td>"+row.longlitude+"</td><td>"+row.created+"</td><td>"+row.created_by_id+"</td><td>"+row.updated+"</td><td>"+row.updated_by_id+"</td></tr>");
+				}
+				for(var i = 0;i < data.areas.length;i++){
+					var row = data.areas[i];
+					$("#table-areas").append("<tr><td>"+row.name+"</td><td>"+row.map_id+"</td><td>"+row.map_tile_id+"</td><td>"+row.created+"</td><td>"+row.created_by_id+"</td><td>"+row.updated+"</td><td>"+row.updated_by_id+"</td></tr>");
+				}
+			}
+			else{console.log("Error loading locations");}
+		},"json");
+	}
+
 	$( document ).ready(function() {
 		loadMapLocation($("#input-map").text(),$("#input-map").find(':selected').data('name'),$("#input-map").find(':selected').data('ratio'),'#map-col',window,'.map-container',40,80,true);
 		var newPlots = {
@@ -165,6 +254,7 @@
 		$(".map-container").trigger('update', [{
 			newPlots: newPlots
 		}]);
+		loadLocations();
 	});
 
 	//Select map
@@ -231,8 +321,10 @@
 		$.post( "ajax/locations.php", "save=1&"+$("#form-location").serialize())
 		.done(function(data){
 			console.log(data);
+			loadLocations();
 		},"json");
 	});
+
 </script>
 <?php
 	}

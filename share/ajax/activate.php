@@ -151,7 +151,7 @@
 <?php
 		}
 ?>
-<div class="container-fluid">
+<div class="container-fluid clear-top">
 	<table class="table table-hover">
 		<thead>
 			<tr>

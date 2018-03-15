@@ -72,3 +72,8 @@
 .map-entry{
 	cursor:pointer;
 }
+
+.clear-top{
+	/*TODO: $("body").css("padding-top", $(".navbar-fixed-top").height());*/
+	margin-top:60px;
+}
