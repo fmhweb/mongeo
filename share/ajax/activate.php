@@ -179,11 +179,11 @@
 </div>
 <div class="jumbotron p-3 p-md-5 mt-4 text-white rounded bg-dark">
 	<div class="col-md-6 px-0">
+		<p class="lead mb-3">If you have added a new map or removed a map from the maps directory click here: <button id="btn-load-maps" type="button" class="btn btn-primary ml-2">Update maps</button></p>
 		<p class="lead mb-3">Maps that are not needed can be disabled here. They will not be preloaded anymore and take up memory and loading time on the client.</p>
 		<p class="lead mb-3">It is possible to create your own map. Please follow the instructions here: <a href="https://www.vincentbroute.fr/mapael/create-map.php" target="_blank">https://www.vincentbroute.fr/mapael/create-map.php</a></p>
-		<p class="lead mb-3">A list of available maps can be found in this repository: <a href="https://github.com/neveldo/mapael-maps" target="_blank">https://github.com/neveldo/mapael-maps</a></p>
-		<p class="lead mb-3">Read the documentaion on how to add a new map to naGeo: <a href="www.it-hunger.de" target="_blank">www.it-hunger.de</a></p>
-		<p class="lead mb-3">If you have added a new map or removed a map from the maps directory click here: <button id="btn-load-maps" type="button" class="btn btn-primary ml-2">Update maps</button></p>
+		<p class="lead mb-3">Read the documentaion on how to add a new map to Mongeo (EXTERNAL LINK): <a href="www.it-hunger.de" target="_blank">www.it-hunger.de/eyegeo/</a></p>
+		<p class="lead mb-3 text-secondary">HINT: Check this out: This is the true size of countries (EXTERNAL LINK): <a href="https://thetruesize.com/" target="_blank">https://thetruesize.com/</a></p>F3AFFAF3A
 	</div>
 </div>
 <script>

@@ -11,6 +11,7 @@
 		<link rel="stylesheet" href="css/bootstrap.min.css">
 		<link rel="stylesheet" href="css/mongeo.main.css">
 		<link rel="stylesheet" href="css/mongeo.mapael.css">
+		<link rel="stylesheet" href="css/jquery-ui.min.css">
 
 		<title>Mongeo</title>
 		<link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
@@ -78,6 +79,7 @@
 		<main id="main-container" role="main" class="container-fluid"></main>
 
 		<script src="js/jquery-3.3.1.min.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
 		<script src="js/bootstrap.bundle.js"></script>
 		<script src="js/raphael.min.js"></script>
 		<script src="js/jquery.mousewheel.min.js"></script>

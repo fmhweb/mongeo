@@ -73,11 +73,11 @@
 	cursor:pointer;
 }
 
+.load-location{
+	cursor:pointer;
+}
+
 .clear-top{
 	/*TODO: $("body").css("padding-top", $(".navbar-fixed-top").height());*/
 	margin-top:60px;
-}
-
-.hidden{
-	display:none;
 }

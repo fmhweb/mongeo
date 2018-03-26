@@ -1,17 +1,19 @@
 var loadingTimeout;
+var items;
 
 function loading(o){
 	if(o){
-		$("#loading").fadeToggle("slow");
+		$("#loading").fadeToggle("normal");
 		loadingTimeout = setTimeout(function(){loading(1);},1000);
 	}
 	else{
-		$("#loading").fadeOut("slow");
+		$("#loading").fadeOut("normal");
 		clearTimeout(loadingTimeout);
 	}
 }
 
 $("#btn-create").click(function(){
+	loading(1);
 	$.post( "ajax/create.php", function( data ) {
 		$( "#main-container" ).html( data );
 	});
